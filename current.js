@@ -12,8 +12,12 @@ superagent.get('http://kinobusiness.com/kassovye_sbory/films_year/')
 .end((err, res) => {
   if (err) { return console.log(err); }
   const $ = cheerio.load(res.text);
-  $('table.calendar_year tbody tr td:first-child a').each(function() { 
-    console.log($(this).text());
+  $('table.calendar_year tbody tr').each(function() { 
+    console.log('---------------------');
+	//console.log($(this).children());
+	$(this).children().each(function(){
+		console.log(`[${ $(this) }] ${ $(this).text() }`);
+	});
     //console.log($(this).attr('href'));
 	//db.days.insert({'day': $(this).text(), 'ref': $(this).attr('href')});
   })
