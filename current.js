@@ -15,9 +15,20 @@ superagent.get('http://kinobusiness.com/kassovye_sbory/films_year/')
   $('table.calendar_year tbody tr').each(function() { 
     console.log('---------------------');
 	//console.log($(this).children());
-	$(this).children().each(function(){
-		console.log(`[${ $(this) }] ${ $(this).text() }`);
+	var my = {};
+	$(this).children().each(function(i, elem){
+		if (i == 0) my.pos = $(this).text();
+		if (i == 1) my.title = $(this).text();
+		if (i == 2) my.original = $(this).text();
+		if (i == 3) my.distributor = $(this).text();
+		if (i == 4) my.screens = parseInt($(this).text().replace(/\s/g,''));
+		if (i == 5) my.total_rur = parseInt($(this).text().replace(/\s/g,''));
+		if (i == 6) my.total_usd = parseInt($(this).text().replace(/\s/g,''));
+		if (i == 7) my.spectaculars = parseInt($(this).text().replace(/\s/g,''));
+		if (i == 8) my.days = parseInt($(this).text().replace(/\s/g,''));
+		console.log(`[${ elem.name }:${ i }] ${ $(this).text() }`);		
 	});
+	console.log(my);
     //console.log($(this).attr('href'));
 	//db.days.insert({'day': $(this).text(), 'ref': $(this).attr('href')});
   })
