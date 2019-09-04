@@ -5,8 +5,8 @@ const Datastore = require('nedb');
 var db = {};
 db.current = new Datastore({filename : 'current.nedb'});
 db.current.loadDatabase();
-//db.days.ensureIndex({ fieldName: 'day', unique: true }, function (err) {
-//});
+db.current.ensureIndex({ fieldName: 'pos', unique: true }, function (err) {
+});
 
 superagent.get('http://kinobusiness.com/kassovye_sbory/films_year/')
 .end((err, res) => {
