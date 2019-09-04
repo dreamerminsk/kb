@@ -29,9 +29,9 @@ superagent.get('http://kinobusiness.com/kassovye_sbory/films_year/')
 	});
 	console.log(my);
 	db.current.insert(my, function (err) {
-		console.log(err);
+		if (err) { console.log(err); }
 		db.current.update({ pos: my.pos }, my, {}, function (err, numReplaced) {
-			console.log(err);
+			if (err) { console.log(err); }
 			console.log(numReplaced);
 		});
 	});
