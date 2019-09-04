@@ -30,7 +30,7 @@ superagent.get('http://kinobusiness.com/kassovye_sbory/films_year/')
 	});
 	console.log(my);
     //console.log($(this).attr('href'));
-	//db.days.insert({'day': $(this).text(), 'ref': $(this).attr('href')});
+	db.current.insert(my);
   })
 });
 
