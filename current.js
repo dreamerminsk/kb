@@ -14,7 +14,6 @@ superagent.get('http://kinobusiness.com/kassovye_sbory/films_year/')
   const $ = cheerio.load(res.text);
   $('table.calendar_year tbody tr').each(function() { 
     console.log('---------------------');
-	//console.log($(this).children());
 	var my = {};
 	$(this).children().each(function(i, elem){
 		if (i == 0) my.pos = $(this).text();
@@ -29,13 +28,18 @@ superagent.get('http://kinobusiness.com/kassovye_sbory/films_year/')
 		console.log(`[${ elem.name }:${ i }] ${ $(this).text() }`);		
 	});
 	console.log(my);
-    //console.log($(this).attr('href'));
-	db.current.insert(my);
+	db.current.insert(my, function (err) {
+		console.log(err);
+		db.current.update({ pos: my.pos }, my, {}, function (err, numReplaced) {
+			console.log(err);
+			console.log(numReplaced);
+		});
+	});
   })
 });
 
-//db.current.find({}).sort({ ref: 1 }).exec(function (err, docs) {
-//  docs.forEach(function(doc){
-//	  console.log(doc);
-//  });
-//});;
+db.current.find({}).sort({ ref: 1 }).exec(function (err, docs) {
+  docs.forEach(function(doc){
+	  console.log(doc);
+  });
+});;
