@@ -17,10 +17,9 @@
     "axios": "^0.19.0",
     "cheerio": "^1.0.0-rc.3",
     "koa": "^2.8.1",
-<<<<<<< HEAD
-=======
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
     "mongodb": "^3.3.2",
->>>>>>> d15bb0bc0157bcbe05aabf2f7a621709a696ee05
     "nedb": "^1.8.0",
     "superagent": "^5.1.0",
     "tress": "^1.1.4"
