@@ -21,6 +21,7 @@
     "koa-router": "^7.4.0",
     "mongodb": "^3.3.2",
     "nedb": "^1.8.0",
+    "sqlite3": "^4.1.1",
     "superagent": "^5.1.0",
     "tress": "^1.1.4"
   }
