@@ -34,8 +34,47 @@ function processFlag(wiki) {
             }
             const $ = cheerio.load(res.text);
             $('h1.firstHeading').each(function () {
-                console.log($(this).text());
-
-            })
+                let title = $(this).text();
+                console.log(title);
+                insert(title);
+                $('a.mw-thumbnail-link:first-child').each(function () {
+                    r = $(this).attr('href');
+                    last = r.lastIndexOf('px');
+                    first = last;
+                    while (r.charAt(first) !== '/') {
+                        first = first - 1;
+                    }
+                    let rpl = '';
+                    for (i = first + 1; i < last; i++) {
+                        rpl += r.charAt(i);
+                    }
+                    update(title, 'https:' + r.replace(rpl + 'px', '16px'));
+                    console.log(`\t${rpl} - ${r}`);
+                });
+            });
         });
+}
+
+function insert(name) {
+    db.run(`INSERT INTO wiki_flags(file, state) VALUES(?, ?)`, [name, name], function (err) {
+        if (err) {
+            return console.log(err.message);
+        }
+        console.log(`A row has been inserted with rowid ${this.lastID}`);
+    });
+}
+
+function update(name, ref) {
+    superagent.get(ref)
+    .end((err, res) => {
+        if (err) {
+            return console.log(err);
+        }
+        db.run(`UPDATE wiki_flags SET flag16=? WHERE file=?`, [res.body, name], function (err) {
+        if (err) {
+            return console.log(err.message);
+        }
+        console.log(`A row has been updated ${name}`);
+    });
+    });
 }
