@@ -13,7 +13,7 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
 });
 
 
-superagent.get('https://en.wikipedia.org/wiki/Flags_of_Europe')
+superagent.get('https://en.wikipedia.org/wiki/Flags_of_North_America')
     .end((err, res) => {
         if (err) {
             return console.log(err);
@@ -48,7 +48,8 @@ function processFlag(wiki) {
                     for (i = first + 1; i < last; i++) {
                         rpl += r.charAt(i);
                     }
-                    update(title, 'https:' + r.replace(rpl + 'px', '16px'));
+                    let ws = [16, 32 , 48, 64, 96, 128, 256, 512, 1024];
+                    update(title, 'https:' + r.replace(rpl + 'px', '32px'));
                     console.log(`\t${rpl} - ${r}`);
                 });
             });
@@ -64,13 +65,13 @@ function insert(name) {
     });
 }
 
-function update(name, ref) {
+function update(name, ref, w) {
     superagent.get(ref)
     .end((err, res) => {
         if (err) {
             return console.log(err);
         }
-        db.run(`UPDATE wiki_flags SET flag16=? WHERE file=?`, [res.body, name], function (err) {
+        db.run(`UPDATE wiki_flags SET flag' + w + '=? WHERE file=?`, [res.body, name], function (err) {
         if (err) {
             return console.log(err.message);
         }
