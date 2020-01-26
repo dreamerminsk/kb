@@ -1,9 +1,15 @@
-const fs = require('fs');
-const http = require('http');
-const superagent = require('superagent');
 const fetch = require('node-fetch');
-const cheerio = require('cheerio');
 const sqlite3 = require('sqlite3').verbose();
+const rt = require('rate-limiter-flexible');
+const cheerio = require('cheerio');
+
+console.log(cheerio);
+const opts = {
+    points: 20, // 6 points
+    duration: 60, // Per second
+};
+
+const rateLimiter = new rt.RateLimiterMemory(opts);
 
 
 let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис//funny.stats.db', (err) => {
@@ -14,9 +20,16 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
 });
 
 async function fetchAsync(url) {
-    let response = await fetch(url)
-    if (response.ok) return await response.text()
-    throw new Error(response.status)
+
+    return rateLimiter.consume('remoteAddress', 1)
+        .then(async (rateLimiterRes) => {
+            let response = await fetch(url)
+            if (response.ok) return await response.text()
+            throw new Error(response.status)
+        })
+        .catch((rateLimiterRes) => {
+            console.log(rateLimiterRes)
+        });
 }
 
 async function fetchPic(url) {
