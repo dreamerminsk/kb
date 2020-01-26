@@ -12,11 +12,15 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
     console.log('Connected to the chinook database.');
 });
 
-async function fetchAsync (ref) {
-  let response = await fetch(ref);
-  let data = await response.text();
-  return data;
+const fetchAsyncA = async () => 
+	await (await fetch('https://api.github.com')).json()
+
+async function fetchAsync(url) {
+  let response = await fetch(url)
+  if (response.ok) return await response.text()
+  throw new Error(response.status)
 }
+
 
 
 superagent.get('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
