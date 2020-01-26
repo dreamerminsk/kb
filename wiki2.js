@@ -12,28 +12,24 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
     console.log('Connected to the chinook database.');
 });
 
-const fetchAsyncA = async () => 
-	await (await fetch('https://api.github.com')).json()
-
 async function fetchAsync(url) {
-  let response = await fetch(url)
-  if (response.ok) return await response.text()
-  throw new Error(response.status)
+    let response = await fetch(url)
+    if (response.ok) return await response.text()
+    throw new Error(response.status)
 }
 
 
+fetchAsync('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
 
-superagent.get('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
-    .end((err, res) => {
-        if (err) {
-            return console.log(err);
-        }
+    .then(data => {
         const $ = cheerio.load(res.text);
         $('a[href$=".svg"]').each(function () {
             console.log($(this).attr('href'));
             processFlag($(this).attr('href'));
         })
-    });
+    })
+
+    .catch(error => console.error(error));
 
 function processFlag(wiki) {
     link = 'https://en.wikipedia.org' + wiki;
