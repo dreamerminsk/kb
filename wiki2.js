@@ -1,6 +1,7 @@
 const fs = require('fs');
 const http = require('http');
 const superagent = require('superagent');
+const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 const sqlite3 = require('sqlite3').verbose();
 
@@ -18,11 +19,16 @@ async function fetchAsync(url) {
     throw new Error(response.status)
 }
 
+async function fetchPic(url) {
+    let response = await fetch(url)
+    if (response.ok) return await response.blob()
+    throw new Error(response.status)
+}
 
 fetchAsync('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
 
     .then(data => {
-        const $ = cheerio.load(res.text);
+        const $ = cheerio.load(data);
         $('a[href$=".svg"]').each(function () {
             console.log($(this).attr('href'));
             processFlag($(this).attr('href'));
@@ -33,12 +39,10 @@ fetchAsync('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
 
 function processFlag(wiki) {
     link = 'https://en.wikipedia.org' + wiki;
-    superagent.get(link)
-        .end((err, res) => {
-            if (err) {
-                return console.log(err);
-            }
-            const $ = cheerio.load(res.text);
+    fetchAsync(link)
+
+        .then(data => {
+            const $ = cheerio.load(data);
             $('h1.firstHeading').each(function () {
                 let title = $(this).text();
                 console.log(title);
@@ -59,7 +63,9 @@ function processFlag(wiki) {
                     console.log(`\t${rpl} - ${r}`);
                 });
             });
-        });
+        })
+
+        .catch(error => console.error(error));
 }
 
 function insert(name) {
@@ -72,16 +78,16 @@ function insert(name) {
 }
 
 function update(name, ref, w) {
-    superagent.get(ref)
-        .end((err, res) => {
-            if (err) {
-                return console.log(err);
-            }
-            db.run(`UPDATE wiki_flags SET flag${w}=? WHERE file=?`, [res.body, name], function (err) {
+    fetchPic(ref)
+
+        .then(data => {
+            db.run(`UPDATE wiki_flags SET flag${w}=? WHERE file=?`, [data, name], function (err) {
                 if (err) {
                     return console.log(err.message);
                 }
-                console.log(`A row has been updated ${name}`);
+                console.log(`A row has been updated ${name} - ${w}`);
             });
-        });
+        })
+
+        .catch(error => console.error(error));
 }
