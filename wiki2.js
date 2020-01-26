@@ -20,19 +20,14 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
 });
 
 async function fetchAsync(url) {
-
-    return rateLimiter.consume('remoteAddress', 1)
-        .then(async (rateLimiterRes) => {
-            let response = await fetch(url)
-            if (response.ok) return await response.text()
-            throw new Error(response.status)
-        })
-        .catch((rateLimiterRes) => {
-            console.log(rateLimiterRes)
-        });
+    //await sleep(1);
+    let response = await fetch(url)
+    if (response.ok) return await response.text()
+    throw new Error(response.status)
 }
 
 async function fetchPic(url) {
+    //await sleep(10);
     let response = await fetch(url)
     if (response.ok) return await response.blob()
     throw new Error(response.status)
@@ -103,4 +98,9 @@ function update(name, ref, w) {
         })
 
         .catch(error => console.error(error));
+}
+
+function sleep(time) {
+    console.log(`wait ${time}`);
+    return new Promise((resolve) => setTimeout(resolve, time));
 }
