@@ -1,9 +1,6 @@
-const fs = require('fs');
-const http = require('http');
-const superagent = require('superagent');
-const cheerio = require('cheerio');
+const fetch = require('node-fetch');
 const sqlite3 = require('sqlite3').verbose();
-
+const cheerio = require('cheerio');
 
 let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис//funny.stats.db', (err) => {
     if (err) {
@@ -12,27 +9,38 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
     console.log('Connected to the chinook database.');
 });
 
+async function fetchAsync(url) {
+    //await sleep(1000);
+    let response = await fetch(url)
+    if (response.ok) return await response.text()
+    throw new Error(response.status)
+}
 
-superagent.get('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
-    .end((err, res) => {
-        if (err) {
-            return console.log(err);
-        }
-        const $ = cheerio.load(res.text);
-        $('a[href$=".svg"]').each(function () {
+async function fetchPic(url) {
+    //await sleep(1000);
+    let response = await fetch(url)
+    if (response.ok) return await response.blob()
+    throw new Error(response.status)
+}
+
+fetchAsync('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
+
+    .then(data => {
+        const $ = cheerio.load(data);
+        $('a[href$=".svg"]').each(async function () {
             console.log($(this).attr('href'));
-            processFlag($(this).attr('href'));
+            await processFlag($(this).attr('href'));
         })
-    });
+    })
 
-function processFlag(wiki) {
+    .catch(error => console.error(error));
+
+async function processFlag(wiki) {
     link = 'https://en.wikipedia.org' + wiki;
-    superagent.get(link)
-        .end((err, res) => {
-            if (err) {
-                return console.log(err);
-            }
-            const $ = cheerio.load(res.text);
+    fetchAsync(link)
+
+        .then(data => {
+            const $ = cheerio.load(data);
             $('h1.firstHeading').each(function () {
                 let title = $(this).text();
                 console.log(title);
@@ -49,11 +57,13 @@ function processFlag(wiki) {
                         rpl += r.charAt(i);
                     }
                     let ws = [16, 32, 48, 64, 96, 128, 256, 512, 1024];
-                    ws.forEach(w => update(title, 'https:' + r.replace(rpl + 'px', w + 'px'), w));
+                    ws.forEach(async w => await update(title, 'https:' + r.replace(rpl + 'px', w + 'px'), w));
                     console.log(`\t${rpl} - ${r}`);
                 });
             });
-        });
+        })
+
+        .catch(error => console.error(error));
 }
 
 function insert(name) {
@@ -65,17 +75,17 @@ function insert(name) {
     });
 }
 
-function update(name, ref, w) {
-    superagent.get(ref)
-        .end((err, res) => {
-            if (err) {
-                return console.log(err);
-            }
-            db.run(`UPDATE wiki_flags SET flag${w}=? WHERE file=?`, [res.body, name], function (err) {
-                if (err) {
-                    return console.log(err.message);
-                }
-                console.log(`A row has been updated ${name}`);
-            });
-        });
+async function update(name, ref, w) {
+    data = await fetchPic(ref);
+    db.run(`UPDATE wiki_flags SET flag${w}=? WHERE file=?`, [data, name], function (err) {
+        if (err) {
+            return console.log(err.message);
+        }
+        console.log(`A row has been updated ${name} - ${w}`);
+    });
+}
+
+function sleep(time) {
+    console.log(`wait ${time}`);
+    return new Promise((resolve) => setTimeout(resolve, time));
 }
