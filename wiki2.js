@@ -10,7 +10,7 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
 });
 
 async function fetchAsync(url) {
-    await sleep(1000);
+    //await sleep(1000);
     let response = await fetch(url)
     if (response.ok) return await response.text()
     throw new Error(response.status)
@@ -76,18 +76,13 @@ function insert(name) {
 }
 
 async function update(name, ref, w) {
-    fetchPic(ref)
-
-        .then(data => {
-            db.run(`UPDATE wiki_flags SET flag${w}=? WHERE file=?`, [data, name], function (err) {
-                if (err) {
-                    return console.log(err.message);
-                }
-                console.log(`A row has been updated ${name} - ${w}`);
-            });
-        })
-
-        .catch(error => console.error(error));
+    data = await fetchPic(ref);
+    db.run(`UPDATE wiki_flags SET flag${w}=? WHERE file=?`, [data, name], function (err) {
+        if (err) {
+            return console.log(err.message);
+        }
+        console.log(`A row has been updated ${name} - ${w}`);
+    });
 }
 
 function sleep(time) {
