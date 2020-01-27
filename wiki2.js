@@ -1,16 +1,6 @@
 const fetch = require('node-fetch');
 const sqlite3 = require('sqlite3').verbose();
-const rt = require('rate-limiter-flexible');
 const cheerio = require('cheerio');
-
-console.log(cheerio);
-const opts = {
-    points: 20, // 6 points
-    duration: 60, // Per second
-};
-
-const rateLimiter = new rt.RateLimiterMemory(opts);
-
 
 let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис//funny.stats.db', (err) => {
     if (err) {
@@ -20,14 +10,14 @@ let db = new sqlite3.Database('c://Users//User//YandexDisk//stats//Теннис/
 });
 
 async function fetchAsync(url) {
-    //await sleep(1);
+    await sleep(1000);
     let response = await fetch(url)
     if (response.ok) return await response.text()
     throw new Error(response.status)
 }
 
 async function fetchPic(url) {
-    //await sleep(10);
+    //await sleep(1000);
     let response = await fetch(url)
     if (response.ok) return await response.blob()
     throw new Error(response.status)
@@ -37,15 +27,15 @@ fetchAsync('https://en.wikipedia.org/wiki/Flags_of_country_subdivisions')
 
     .then(data => {
         const $ = cheerio.load(data);
-        $('a[href$=".svg"]').each(function () {
+        $('a[href$=".svg"]').each(async function () {
             console.log($(this).attr('href'));
-            processFlag($(this).attr('href'));
+            await processFlag($(this).attr('href'));
         })
     })
 
     .catch(error => console.error(error));
 
-function processFlag(wiki) {
+async function processFlag(wiki) {
     link = 'https://en.wikipedia.org' + wiki;
     fetchAsync(link)
 
@@ -67,7 +57,7 @@ function processFlag(wiki) {
                         rpl += r.charAt(i);
                     }
                     let ws = [16, 32, 48, 64, 96, 128, 256, 512, 1024];
-                    ws.forEach(w => update(title, 'https:' + r.replace(rpl + 'px', w + 'px'), w));
+                    ws.forEach(async w => await update(title, 'https:' + r.replace(rpl + 'px', w + 'px'), w));
                     console.log(`\t${rpl} - ${r}`);
                 });
             });
@@ -85,7 +75,7 @@ function insert(name) {
     });
 }
 
-function update(name, ref, w) {
+async function update(name, ref, w) {
     fetchPic(ref)
 
         .then(data => {
